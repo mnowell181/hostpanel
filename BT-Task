@@ -1,0 +1,8 @@
+#!/www/server/panel/pyenv/bin/python
+#coding: utf-8
+
+
+import os,sys
+os.chdir('/www/server/panel')
+import task
+task.main()

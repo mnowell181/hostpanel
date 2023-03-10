@@ -1,0 +1,13 @@
+{
+  "language": "Simplified_Chinese",
+  "title": "Linux面板",
+  "brand": "",
+  "product": "Linux面板",
+  "home": "https://www.bt.cn",
+  "download": "https://download.bt.cn",
+  "root_path": "/www",
+  "setup_path": "/www/server",
+  "logs_path": "/www/wwwlogs",
+  "recycle_bin": true,
+  "template": "default"
+}

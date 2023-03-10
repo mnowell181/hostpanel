@@ -1,0 +1,332 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+  .chart-box {
+    display: flex;
+    flex-direction: row;
+    padding: 20px 0;
+  }
+
+  .rank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16.5%;
+    color: #999;
+    line-height: 30px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .chart-li {
+    width: 105px;
+    height: 105px;
+    position: relative;
+  }
+
+  .chart-li canvas {
+    cursor: pointer;
+  }
+
+  .mem_mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(220, 220, 220, .1);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .mem_mask .men_inside_mask {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    bottom: 7px;
+    right: 7px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+  }
+
+  .info-status {
+    height: 30px;
+    line-height: 30px;
+  }
+
+  .outerCircle {
+    width: 105px;
+    height: 105px;
+    text-align: center;
+    background-color: #e5e5e5;
+    border-radius: 50%;
+    padding: 7px;
+  }
+
+  .outerCircle .innerCircle {
+    width: 100%;
+    height: 100%;
+    line-height: 91px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 17px;
+    background-color: #fff;
+  }
+    .systeminfo {
+        background-color: white;
+        width: 25%;
+        height: 120px;
+        padding: 20px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .systeminfo:hover{
+	background-color:#0052D9;
+	cursor: pointer;
+	color: white;
+}
+    .systeminfo-all {
+        display: flex;
+        justify-content: center;
+        align-items: center
+    }
+    .systeminfo-title {
+        font-size: 14px;
+        height:28px;
+    }
+    .systeminfo-data {
+        font-size: 28px;
+    }
+    .systeminfo-ico {
+        margin: 0 15px;
+        margin-left: auto;
+        height: 56px;
+        width: 56px;
+    }  
+</style>
+<div class="main-content">
+  <div class="container-fluid" style="padding-bottom: 66px;">
+    <div class="index-pos-box bgw mtb15">
+      <div class="position f12 c6 pull-left" style="background:none;padding-left:15px">
+                <span class="ico-system">系统:</span><span id="info" style="margin-left:10px;">{{data['lan']['S2']}}</span>&#12288;&#12288;{{data['lan']['S3']}} <span id="running">{{data['lan']['S4']}}</span>
+      </div>
+      <span class="pull-right f12 c6" style="line-height:52px; margin-right:15px">
+				<span id="btversion" style="margin-right:10px"><a onclick="index.open_log()">version:{{session['version']}}</a></span>
+        <!-- <span id="toUpdate"><a class="btlink" href="javascript:index.check_update();">更新</a></span> -->
+        <span style="margin-right:10px"><a class="btlink" href="javascript:index.re_server();">重启</a></span>
+        <span style="margin:0 10px"><a class="btlink" href="https://t.me/hostpanelg">技术支持群</a></span>
+      </span>
+    </div>
+    <div class="danger-tips">
+      <div class="important-title" id="messageError" style="display: none; margin-top:15px"></div>
+        </div>
+<div style="display:flex;gap: 15px">
+    <div onclick="window.open('./site','_self')" class="systeminfo">
+        <div class="systeminfo-all" >
+            <div>
+                <div class="systeminfo-title">
+                    <span >{{data['lan']['N1']}}</span>
+                </div>
+                <div>
+                    <span class="systeminfo-data">{{data['siteCount']}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="systeminfo-ico">
+            <svg data-name="website" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84"><g data-name="website"><circle cx="42" cy="42" r="42" fill="#f2f3fe"/><path d="M33.88 38.25h-4.94a13.58 13.58 0 0 0-.52 3.75c0 1.3.18 2.56.52 3.75h4.94c-.21-1.2-.31-2.45-.31-3.75s.1-2.55.31-3.75zm1.91 0a19.67 19.67 0 0 0-.34 3.75c0 1.31.11 2.56.34 3.75h5.28v-7.49h-5.28zm2.74 16.88c-2-2.13-3.45-4.7-4.23-7.52h-4.67c1.69 3.71 4.96 6.47 8.9 7.52zm2.53-.13v-7.38h-4.81c.88 2.82 2.48 5.28 4.81 7.39zm-2.53-26.14c-3.94 1.05-7.21 3.8-8.9 7.51h4.67c.78-2.81 2.23-5.39 4.23-7.52zm2.53.13c-2.33 2.1-3.93 4.56-4.81 7.38h4.81v-7.39zm9.06 9.26c.21 1.2.31 2.45.31 3.75s-.1 2.55-.31 3.75h4.94c.34-1.19.52-2.45.52-3.75s-.18-2.56-.52-3.75h-4.94zm-1.91 0h-5.28v7.49h5.28c.23-1.19.34-2.44.34-3.75s-.11-2.56-.34-3.75zm-2.74 16.88c3.94-1.05 7.21-3.8 8.9-7.52H49.7c-.78 2.81-2.23 5.39-4.23 7.52zM42.94 55c2.33-2.11 3.93-4.56 4.81-7.38h-4.81v7.39zm2.53-26.14c2 2.12 3.45 4.7 4.23 7.51h4.67a13.642 13.642 0 0 0-8.9-7.52zm-2.53.13v7.38h4.81c-.88-2.82-2.48-5.28-4.81-7.39zM42 57.92c-8.8 0-15.93-7.13-15.93-15.93S33.2 26.06 42 26.06s15.93 7.13 15.93 15.93S50.8 57.92 42 57.92z" fill="#3661d6"/></g></svg>
+        </div>
+    </div>
+    <div onclick="window.open('./ftp','_self')" class="systeminfo">
+        <div class="systeminfo-all">
+            <div>
+                <div class="systeminfo-title">
+                    <span>{{data['lan']['N3']}}</span>
+                </div>
+                <div>
+                    <span class="systeminfo-data">{{data['ftpCount']}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="systeminfo-ico">
+            <svg id="__1" data-name="1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84"><defs><style>.cls-1{fill:#3661d6}</style></defs><circle cx="42" cy="42" r="42" fill="#f2f3fe"/><path class="cls-1" d="M55.82 32.5v-2.79c0-.6-.49-1.09-1.09-1.09H40.46a2.551 2.551 0 0 0-2.09-1.09h-9.82A2.56 2.56 0 0 0 26 30.08v23.85c0 1.4 1.15 2.55 2.55 2.55h26.91c1.4 0 2.55-1.15 2.55-2.55V35.02c0-1.28-.95-2.34-2.18-2.52zm-2.18-.03H42.96l-1.09-1.67h11.77v1.67zm2.18 21.45c0 .2-.16.36-.36.36H28.55c-.2 0-.36-.16-.36-.36V30.07c0-.2.16-.36.36-.36h9.83c.13 0 .23.06.31.16l2.76 4.28c.2.31.55.49.92.49h13.09c.2 0 .36.16.36.36v18.92z"/><path class="cls-1" d="M48.3 37.74c-.38-.47-1.08-.52-1.54-.15s-.52 1.08-.15 1.54l1.18 1.41H33.9c-.6 0-1.09.49-1.09 1.09s.49 1.09 1.09 1.09h16.22c.42 0 .81-.25.99-.63s.12-.83-.15-1.16l-2.66-3.2zm1.77 7.9H33.85c-.42 0-.81.25-.99.63s-.12.83.15 1.16l2.66 3.2c.22.26.52.39.84.39.25 0 .49-.09.7-.25.47-.38.52-1.08.15-1.54l-1.18-1.41h13.89c.6 0 1.09-.49 1.09-1.09s-.49-1.09-1.09-1.09z"/></svg>
+        </div>
+    </div>
+    <div onclick="window.open('./database','_self')" class="systeminfo">
+        <div class="systeminfo-all">
+            <div>
+                <div class="systeminfo-title">
+                    <span>{{data['lan']['N2']}}</span>
+                </div>
+                <div>
+                    <span class="systeminfo-data">{{data['databaseCount']}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="systeminfo-ico">
+            <svg id="__2" data-name="2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84"><defs><style>.cls-1{fill:#3661d6}</style></defs><g id="__1-2" data-name="1"><circle cx="42" cy="42" r="42" fill="#f2f3fe"/><path class="cls-1" d="M56.17 53.04c.08-.2.12-.42.12-.65v-.17c0 .28-.04.55-.12.82zm-28.47-.82v.42c0 .26.08.5.23.7a2.84 2.84 0 0 1-.23-1.12z"/><path class="cls-1" d="M56.29 31.8c0-3.76-7.2-5.71-14.3-5.71s-14.28 1.96-14.28 5.69c0 .08 0 .17.01.25 0 .05-.01.1-.01.15v20.05c0 .39.08.77.23 1.12 1.28 3.01 7.71 4.57 14.05 4.57s13.2-1.66 14.18-4.86c.08-.26.12-.53.12-.82V32.48c0-.1 0-.21-.02-.3.02-.12.02-.24.02-.37zm-2.36 20.42c0 1.13-4.23 3.33-11.94 3.33s-11.92-2.15-11.92-3.33v-4.03c2.7 1.59 7.33 2.41 11.92 2.41s9.25-.82 11.94-2.41v4.03zm0-7.31c0 1.13-4.23 3.33-11.94 3.33s-11.92-2.15-11.92-3.33v-3.32C32.77 43.18 37.4 44 41.99 44s9.25-.82 11.94-2.41v3.33zm0-6.6c0 1.13-4.23 3.33-11.94 3.33s-11.92-2.15-11.92-3.33v-3.27c2.7 1.59 7.33 2.41 11.92 2.41s9.25-.79 11.94-2.38v3.24zm-11.94-3.2c-7.72 0-11.92-2.14-11.92-3.32s4.2-3.35 11.92-3.35 11.94 2.25 11.94 3.35-4.23 3.32-11.94 3.32z"/></g></svg>
+        </div>
+    </div>
+    <div onclick="index.reader_warning_view()" class="systeminfo">
+        <div class="systeminfo-all">
+            <div>
+                <div class="systeminfo-title">
+                    <span>{{data['lan']['N4']}}</span>
+                </div>
+                <div>
+                    <span  class="btlink warning_num" style="font-size: 28px;">0</span>
+                </div>
+            </div>
+        </div>
+        <div class="systeminfo-ico">
+ <svg id="__2" data-name="2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84"><defs><style>.cls-1{fill:#3661d6}</style></defs><g id="__1-2" data-name="1"><circle cx="42" cy="42" r="42" fill="#f2f3fe"/><path class="cls-1" d="M50.5 36.94l-.52-.52-.01-.01a.715.715 0 0 0-1.02.01l-8.47 8.57-3.97-4.03a.727.727 0 0 0-1.03 0l-.52.53c-.28.28-.28.74 0 1.02l5.01 5.07.01.01c.29.28.75.28 1.03-.01l9.5-9.62c.28-.28.28-.73 0-1.02zm0 0l-.52-.52-.01-.01a.715.715 0 0 0-1.02.01l-8.47 8.57-3.97-4.03a.727.727 0 0 0-1.03 0l-.52.53c-.28.28-.28.74 0 1.02l5.01 5.07.01.01c.29.28.75.28 1.03-.01l9.5-9.62c.28-.28.28-.73 0-1.02z"/><path class="cls-1" d="M53.28 30.45c-.15-.03-.29-.06-.62-.12-1.58-.28-3.15-.73-4.65-1.37a35.03 35.03 0 0 1-4.52-2.32c-.8-.49-1.01-.59-1.49-.59s-.67.1-1.47.59c-1.45.88-2.97 1.66-4.54 2.32-1.5.64-4.66 1.52-6.24 1.81a.971.971 0 0 0-.8.94v12.01c.06 3.06 2.47 6.31 6.42 9.67 2.51 2.13 6.09 4.56 6.63 4.56s4.16-2.43 6.68-4.55c3.97-3.36 6.37-6.62 6.37-9.7V33.31q0-2.48-1.77-2.86zm-.13 2.85v10.4c0 2.34-2.13 5.24-5.71 8.26-1.3 1.09-2.66 2.11-4.07 3.05-.49.33-.95.63-1.35.87h-.03c-.4-.25-.85-.55-1.33-.88-1.41-.95-2.76-1.97-4.05-3.06-3.56-3.03-5.71-5.92-5.75-8.25V32.46c1.79-.4 4.46-1.16 5.88-1.77 1.65-.7 3.26-1.52 4.79-2.45.28-.18.39-.24.48-.28.16.08.32.18.48.28 1.53.93 3.12 1.75 4.77 2.45 1.64.7 3.35 1.18 5.05 1.49.31.06.44.08.57.11.4.09.27-.2.27 1z"/></g></svg> 
+        </div>
+    </div>
+</div>
+    <div class="server bgw mtb15">
+      <div class="title c6 f16 plr15">
+        <h3 class="c6 f16 pull-left">状态</h3>
+      </div>
+      <div class="server-circle">
+        <ul class="row" id="systemInfoList">
+          <li class="rank col-xs-6 col-sm-3 col-md-3 col-lg-2 mtb20 circle-box text-center">
+            <div class="titles">
+              <span>负载状态</span>
+              <a href="#" target="_blank" class="bt-ico-ask" style="cursor: pointer;">?</a>
+            </div>
+            <div id="loadChart" class="chart-li">
+              <div class="outerCircle">
+                <div class="innerCircle">0%</div>
+              </div>
+            </div>
+            <div id="load" class="info-status">获取中...</div>
+          </li>
+          <li class="rank col-xs-6 col-sm-3 col-md-3 col-lg-2 mtb20 circle-box text-center">
+            <div class="titles">CPU使用率</div>
+            <div id="cpuChart" class="chart-li">
+              <div class="outerCircle">
+                <div class="innerCircle">0%</div>
+              </div>
+            </div>
+            <div id="cpu" class="info-status">获取中...</div>
+          </li>
+          <li class="rank col-xs-6 col-sm-3 col-md-3 col-lg-2 mtb20 circle-box text-center">
+            <div class="titles">内存使用率</div>
+            <div id="memChart" class="chart-li">
+              <div class="outerCircle">
+                <div class="innerCircle">0%</div>
+              </div>
+            </div>
+            <div id="mem" class="info-status">获取中...</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+        
+
+    <div class="col-xs-12 col-sm-12 col-md-6 pull-left pd0">
+      <div class="pr8">
+        <div class="bgw">
+          <div class="title c6 f16 plr15">{{data['lan']['P4']}}</div>
+          <div class="setting-con" style="padding:0; height:442px; margin-right: -4px; overflow: hidden;">
+            <div class="container-fluid soft-man">
+              <input name="list1SortOrder" type="hidden" value="" />
+              <div id="indexsoft" class="row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-6 pull-left pd0">
+      <div class="pl7">
+        <div class="bgw" style="height:283.5px">
+          <div class="title c6 f16 plr15 tabs-nav">
+            <span class="active">流量</span>
+            <span>磁盘IO</span>
+            <div class="tabs-down">
+              <select class="bt-input-text" name="network-io" style="font-size: 12px;"></select>
+              <select class="bt-input-text hide" name="disk-io" style="font-size: 12px;"></select>
+            </div>
+          </div>
+          <div class="tabs-content">
+            <div class="tabs-active tabs-item">
+              <div class="bw-info">
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9"><span class="ico-up"></span>上行</p><a id="upSpeed">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9"><span class="ico-down"></span>下行</p><a id="downSpeed">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9">总发送</p><a id="upAll">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9">总接收</p><a id="downAll">{{data['lan']['S2']}}</a>
+                </div>
+              </div>
+              <div id="NetImg" style="width:100%;height: 370px;"></div>
+            </div>
+            <div class="tabs-item">
+              <div class="bw-info">
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9"><span class="ico-read"></span>读取</p><a id="readBytes">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9"><span class="ico-write"></span>写入</p><a id="writeBytes">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9">每秒读写</p><a id="diskIops">{{data['lan']['S2']}}</a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                  <p class="c9">IO延迟</p><a id="diskTime">{{data['lan']['S2']}}</a>
+                </div>
+              </div>
+              <div id="IoStat" style="width:100%;height: 370px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="col-xs-12 col-sm-12 col-md-6 pull-left pd0 mtb15"> -->
+    <!-- <div class="pl7"> -->
+    <!-- <div class="bgw" style="height:283.5px"> -->
+    <!-- <div class="title c6 f16 plr15"><span style="float: right;"><select class="bt-input-text" name="disk-io" style="font-size: 12px;"></select></span></div> -->
+
+    <!-- </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+  var bind_user = "{{data['bind']}}"
+</script>
+<script type="text/javascript"
+  src="/static/js/jquery.dragsort-0.5.2.min.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+<script type="text/javascript"
+  src="/static/js/echarts.min.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+<script type="text/javascript" src="/static/js/index.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+<script type="text/javascript" src="/static/js/soft.js?version={{g['version']}}&repair={{data['js_random']}}"></script>
+<script type="text/javascript" src="/static/ace/ace.js?version={{g['version']}}&repair={{data['js_random']}}"
+  defer></script>
+<script type="text/javascript">
+  $(".btpro span").click(function (e) {
+    layer.confirm('切换回免费版可通过解绑账号实现', { icon: 3, btn: ['解绑账号'], closeBtn: 2, title: '是否取消授权' }, function () {
+      $.post('/ssl?action=DelToken', {}, function (rdata) {
+        layer.msg(rdata.msg);
+        setTimeout(function () {
+          window.location.reload();
+        }, 2000);
+      });
+    });
+    e.stopPropagation();
+  });
+  setCookie('pro_end', {{ data.pro_end }});
+  setCookie('ltd_end', {{ data.ltd_end }});
+  setCookie('serverType', "{{session['webserver']}}");
+  bt.soft.get_index_renew();
+</script>
+{% endblock %}
